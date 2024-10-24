@@ -55,7 +55,14 @@ async function getBackupImages(data) {
 			const backup = images.filter((image) => {
 				return image.includes(size);
 			});
-			console.log(backup);
+
+			if (backup.length === 1) {
+				copyToShellDirectory(imagesPath(backup[0])(), shellsPath(size)(backup[0]))	
+			} else {
+				console.log(`check image for size ${size} -`.red,'you must have only 1 image with file name matching the shell size'.cyan);
+				process.exit(0)
+			}
+
 		}
 	} catch (error) {
 		console.error(error);
