@@ -15,17 +15,16 @@ var imagesPath = setFilePath("images");
 // Init Config JSON
 var configData = getConfigValues(config);
 
-insertConfigData(configData);
-getBackupImages(configData);
+await insertConfigData(configData);
+await getBackupImages(configData);
 
 async function insertConfigData(data) {
 	for (const size of data.sizes) {
 		try {
-			const currentSizeDir = shellsPath(size);
-			const insertGenCode = updateFile(currentSizeDir("index.html"));
-			const insertDynamicData = updateFile(currentSizeDir("logic.js"));
-
-			await copyToShellDirectory(templatePath()(), shellsPath()());
+			console.log(size);
+			const insertGenCode = updateFile(shellsPath(size, "index.html"));
+			const insertDynamicData = updateFile(shellsPath(size,"logic.js"));
+			await copyToShellDirectory(templatePath(), shellsPath(size));
 
 			await insertGenCode(
 				"<!-- DYNAMIC CONTENT REPLACEMENT FLAG -->",
@@ -41,23 +40,18 @@ async function insertConfigData(data) {
 	}
 }
 
-// For Each size
-// Check if an image exists
-// if yes - copy to shells
-// if no - inform user, image does not exist
 async function getBackupImages(data) {
 	try {
-		const images = await fse.readdir(imagesPath()());
+		const images = await fse.readdir(imagesPath());
 		console.log(images);
 
 		for (const size of data.sizes) {
-			console.log(size);
 			const backup = images.filter((image) => {
 				return image.includes(size);
 			});
 
 			if (backup.length === 1) {
-				copyToShellDirectory(imagesPath(backup[0])(), shellsPath(size)(backup[0]))	
+				copyToShellDirectory(imagesPath(backup[0]), shellsPath(size, backup[0]))	
 			} else {
 				console.log(`check image for size ${size} -`.red,'you must have only 1 image with file name matching the shell size'.cyan);
 				process.exit(0)
@@ -122,11 +116,13 @@ function decodeString(encodedString) {
 	return Buffer.from(encodedString, "base64").toString("utf8");
 }
 
-// Build path with currying
+// Build path with partial application
 function setFilePath(baseDir) {
-	return function addSizePath(sizeDir = "") {
-		return function addFilePath(file = "") {
+		return function addPath(sizeDir = "", file = "") {
 			return path.join(import.meta.dirname, baseDir, sizeDir, file);
 		};
-	};
 }
+ 
+// ToDo 
+// refactor setFilePath & insertConfigData
+// set up tests
