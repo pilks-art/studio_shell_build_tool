@@ -23,7 +23,7 @@ async function insertConfigData(data) {
 		try {
 			console.log(size);
 			const insertGenCode = updateFile(shellsPath(size, "index.html"));
-			const insertDynamicData = updateFile(shellsPath(size,"logic.js"));
+			const insertDynamicData = updateFile(shellsPath(size, "logic.js"));
 			await copyToShellDirectory(templatePath(), shellsPath(size));
 
 			await insertGenCode(
@@ -51,18 +51,22 @@ async function getBackupImages(data) {
 			});
 
 			if (backup.length === 1) {
-				copyToShellDirectory(imagesPath(backup[0]), shellsPath(size, backup[0]))	
+				copyToShellDirectory(
+					imagesPath(backup[0]),
+					shellsPath(size, backup[0])
+				);
 			} else {
-				console.log(`check image for size ${size} -`.red,'you must have only 1 image with file name matching the shell size'.cyan);
-				process.exit(0)
+				console.log(
+					`check image for size ${size} -`.red,
+					"you must have only 1 image with file name matching the shell size"
+						.cyan
+				);
+				process.exit(0);
 			}
-
 		}
 	} catch (error) {
 		console.error(error);
 	}
-
-	
 }
 
 async function copyToShellDirectory(src, destination) {
@@ -118,11 +122,13 @@ function decodeString(encodedString) {
 
 // Build path with partial application
 function setFilePath(baseDir) {
-		return function addPath(sizeDir = "", file = "") {
-			return path.join(import.meta.dirname, baseDir, sizeDir, file);
-		};
+	return function addPath(sizeDir = "", file = "") {
+		return path.join(import.meta.dirname, baseDir, sizeDir, file);
+	};
 }
- 
-// ToDo 
-// refactor setFilePath & insertConfigData
+
+export {decodeString, setDynamicDataString}
+// ToDo
 // set up tests
+// setDynamicDataString, getConfigValues & setFilePath
+// add zip file 
