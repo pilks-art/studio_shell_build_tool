@@ -127,7 +127,7 @@ function setFilePath(baseDir) {
 	};
 }
 
-export {decodeString, setDynamicDataString}
+export {decodeString, setDynamicDataString, getConfigValues}
 // ToDo
 // set up tests
 // setDynamicDataString, getConfigValues & setFilePath
