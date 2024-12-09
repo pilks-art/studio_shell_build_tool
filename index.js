@@ -21,7 +21,7 @@ await getBackupImages(configData);
 async function insertConfigData(data) {
 	for (const size of data.sizes) {
 		try {
-			console.log(size);
+			// console.log(size);
 			const insertGenCode = updateFile(shellsPath(size, "index.html"));
 			const insertDynamicData = updateFile(shellsPath(size, "logic.js"));
 			await copyToShellDirectory(templatePath(), shellsPath(size));
@@ -43,7 +43,7 @@ async function insertConfigData(data) {
 async function getBackupImages(data) {
 	try {
 		const images = await fse.readdir(imagesPath());
-		console.log(images);
+		// console.log(images);
 
 		for (const size of data.sizes) {
 			const backup = images.filter((image) => {
@@ -80,9 +80,10 @@ async function copyToShellDirectory(src, destination) {
 function getConfigValues(config) {
 	try {
 		let data = fse.readJsonSync(config);
+		// console.log(data.sizes);
 
-		if (data.sizes === undefined) {
-			console.log("At least one size is required".red);
+		if (data.sizes.length === 0 || data.sizes.some(size => /^[^a-zA-Z0-9]*$/.test(size))) {
+			console.log("All sizes must be valid and at least one is required".red);
 			process.exit(0);
 		}
 
@@ -91,11 +92,11 @@ function getConfigValues(config) {
 
 		return data;
 	} catch (error) {
-		console.error(error);
+		throw new Error(error)
 	}
 }
 
-function updateFile(filePath) {
+function io(filePath) {
 	return async function replaceWithRegex(replacer, configData) {
 		const pattern = new RegExp(replacer, "g");
 		try {
@@ -131,4 +132,9 @@ export {decodeString, setDynamicDataString, getConfigValues}
 // ToDo
 // set up tests
 // setDynamicDataString, getConfigValues & setFilePath
+// =========================
+// setDynamicDataString - Work on handling errors for use case with
+// 1. no data
+// 2. missing data url or exit url
+// =========================
 // add zip file 
