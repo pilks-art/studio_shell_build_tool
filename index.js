@@ -80,9 +80,13 @@ async function copyToShellDirectory(src, destination) {
 function getConfigValues(config) {
 	try {
 		let data = fse.readJsonSync(config);
-		// console.log(data.sizes);
+		console.log(data);
 
-		if (data.sizes.length === 0 || data.sizes.some(size => /^[^a-zA-Z0-9]*$/.test(size))) {
+		// refactor to loop data properties, exiting if empty
+		if (
+			data.sizes.length === 0 ||
+			data.sizes.some((size) => /^[^a-zA-Z0-9]*$/.test(size))
+		) {
 			console.log("All sizes must be valid and at least one is required".red);
 			process.exit(0);
 		}
@@ -92,11 +96,11 @@ function getConfigValues(config) {
 
 		return data;
 	} catch (error) {
-		throw new Error(error)
+		throw new Error(error);
 	}
 }
 
-function io(filePath) {
+function updateFile(filePath) {
 	return async function replaceWithRegex(replacer, configData) {
 		const pattern = new RegExp(replacer, "g");
 		try {
@@ -108,14 +112,29 @@ function io(filePath) {
 }
 
 function setDynamicDataString(dynamicData) {
-	const concatDynamicValues = dynamicData
-		.map((dataObject) => {
-			const [creative, dynamicContent] = Object.entries(dataObject);
-			return `${creative.join(".")} = ${dynamicContent.join(".")};\n`;
-		})
-		.join("  ");
-	return concatDynamicValues;
+
+		const concatDynamicValues = dynamicData
+			.map((dataObject) => {
+				const [creative, dynamicContent] = Object.entries(dataObject);
+
+				console.log(creative, dynamicContent);
+				if (!creative || !dynamicContent)
+					throw new Error(
+						"Both creative and dynamicContent properties must be present".yellow
+					);
+
+				return `${creative.join(".")} = ${dynamicContent.join(".")};\n`;
+			})
+			.join("  ");
+
+		return concatDynamicValues;
 }
+
+// console.log(setDynamicDataString([]));
+
+// console.log(setDynamicDataString([{
+// 	"creative" : "data.url"
+//  }]))
 
 function decodeString(encodedString) {
 	return Buffer.from(encodedString, "base64").toString("utf8");
@@ -135,6 +154,6 @@ export {decodeString, setDynamicDataString, getConfigValues}
 // =========================
 // setDynamicDataString - Work on handling errors for use case with
 // 1. no data
-// 2. missing data url or exit url
+// 3. missing data url or exit url 
 // =========================
 // add zip file 

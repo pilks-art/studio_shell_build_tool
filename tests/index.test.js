@@ -10,7 +10,7 @@ import {
 } from "../index.js";
 
 var testJsonPath = path.join(import.meta.dirname, "test.json");
-var ivalidSizePath = path.join(import.meta.dirname, "second.json");
+var invalidSizePath = path.join(import.meta.dirname, "second.json");
 
 describe("config data unit tests", function () {
 	it("should return gen code as utf8", function () {
@@ -30,6 +30,20 @@ describe("config data unit tests", function () {
 		assert.equal(
 			dynamicValueString,
 			"creative.data.url = dynamicContent.data[0].Data_Url;\n"
+		);
+	});
+
+	it("should throw an error if dynamic data object does not have 2 properties", function (t) {
+		assert.throws(
+			function () {
+				setDynamicDataString([{
+					"creative" : "data.url"
+				 }]);
+			},
+			{
+				name: "Error",
+				message: "\x1B[33mBoth creative and dynamicContent properties must be present\x1B[39m",
+			}
 		);
 	});
 });
@@ -52,7 +66,7 @@ describe("config data integration tests", function () {
 			sizes: ["300x600"],
 		});
 
-		await fse.writeJSON(ivalidSizePath, {
+		await fse.writeJSON(invalidSizePath, {
 			genCode: "TG9",
 			dynamicData: [],
 			sizes: ["300x600", " "],
@@ -61,7 +75,7 @@ describe("config data integration tests", function () {
 
 	after(function () {
 		fse.unlink(testJsonPath);
-		fse.unlink(ivalidSizePath);
+		fse.unlink(invalidSizePath);
 	});
 
 	it("should read json data", function () {
@@ -87,10 +101,8 @@ describe("config data integration tests", function () {
 		);
 	});
 
-
 	it("should log and exit if there is no size input", function (t) {
-		
-		t.mock.method(console, "log")
+		t.mock.method(console, "log");
 
 		t.mock.method(process, "exit", function throwExit() {
 			throw new Error("process.exit called");
@@ -98,7 +110,7 @@ describe("config data integration tests", function () {
 
 		assert.throws(
 			function () {
-				getConfigValues(ivalidSizePath);
+				getConfigValues(invalidSizePath);
 			},
 			{
 				name: "Error",
@@ -107,9 +119,10 @@ describe("config data integration tests", function () {
 		);
 
 		const call = console.log.mock.calls[0];
-		const redConsoleLog = '\x1B[31mAll sizes must be valid and at least one is required\x1B[39m';
+		const redConsoleLog =
+			"\x1B[31mAll sizes must be valid and at least one is required\x1B[39m";
 
-		assert.strictEqual(call.arguments[0], redConsoleLog)
+		assert.strictEqual(call.arguments[0], redConsoleLog);
 
 		t.mock.reset();
 	});
