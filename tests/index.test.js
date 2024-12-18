@@ -19,6 +19,18 @@ describe("config data unit tests", function () {
 		assert.equal(decoded, "dynamic data mock");
 	});
 
+	it("should throw an error if gen code is not string", function (t) {
+		assert.throws(
+			function () {
+				decodeString('a non base64 string')
+			},
+			{
+				name: "Error",
+				message: "Gen code should be a valid string",
+			}
+		);
+	});
+
 	it("should return dynamic data objects as strings", function () {
 		const dynamicValueString = setDynamicDataString([
 			{

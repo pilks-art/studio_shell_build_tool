@@ -80,9 +80,7 @@ async function copyToShellDirectory(src, destination) {
 function getConfigValues(config) {
 	try {
 		let data = fse.readJsonSync(config);
-		console.log(data);
 
-		// refactor to loop data properties, exiting if empty
 		if (
 			data.sizes.length === 0 ||
 			data.sizes.some((size) => /^[^a-zA-Z0-9]*$/.test(size))
@@ -113,10 +111,12 @@ function updateFile(filePath) {
 
 function setDynamicDataString(dynamicData) {
 
+	console.log(dynamicData);
 		const concatDynamicValues = dynamicData
 			.map((dataObject) => {
 				const [creative, dynamicContent] = Object.entries(dataObject);
 
+				console.log(dataObject);
 				console.log(creative, dynamicContent);
 				if (!creative || !dynamicContent)
 					throw new Error(
@@ -130,14 +130,22 @@ function setDynamicDataString(dynamicData) {
 		return concatDynamicValues;
 }
 
-// console.log(setDynamicDataString([]));
-
 // console.log(setDynamicDataString([{
 // 	"creative" : "data.url"
 //  }]))
 
 function decodeString(encodedString) {
-	return Buffer.from(encodedString, "base64").toString("utf8");
+	// add error handling for case where non string given as argument
+	const base64Regex = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}==)?$/;
+// amend here
+	// if (typeof encodedString !== 'string') return false;
+
+	console.log(base64Regex.test(encodedString));
+
+	if (base64Regex.test(encodedString)) {
+		return Buffer.from(encodedString, "base64").toString("utf8");
+	} 
+	return encodedString
 }
 
 // Build path with partial application
@@ -153,7 +161,14 @@ export {decodeString, setDynamicDataString, getConfigValues}
 // setDynamicDataString, getConfigValues & setFilePath
 // =========================
 // setDynamicDataString - Work on handling errors for use case with
-// 1. no data
-// 3. missing data url or exit url 
+// 1. no data - use typescript
+// 
+// getConfigValues - check that no empty values are given
+// *********
+// decodeString - check that string is supplied as argument
 // =========================
-// add zip file 
+// add zip file functionality
+
+// Read me - Must use node v21.4.0
+// npm test
+// node index
