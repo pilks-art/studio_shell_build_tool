@@ -89,7 +89,7 @@ function getConfigValues(config) {
 			process.exit(0);
 		}
 
-		data.genCode = decodeString(data.genCode);
+		data.genCode = validateGenCodeString(data.genCode);
 		data.dynamicData = setDynamicDataString(data.dynamicData);
 
 		return data;
@@ -110,42 +110,36 @@ function updateFile(filePath) {
 }
 
 function setDynamicDataString(dynamicData) {
-
 	console.log(dynamicData);
-		const concatDynamicValues = dynamicData
-			.map((dataObject) => {
-				const [creative, dynamicContent] = Object.entries(dataObject);
+	const concatDynamicValues = dynamicData
+		.map((dataObject) => {
+			const [creative, dynamicContent] = Object.entries(dataObject);
 
-				console.log(dataObject);
-				console.log(creative, dynamicContent);
-				if (!creative || !dynamicContent)
-					throw new Error(
-						"Both creative and dynamicContent properties must be present".yellow
-					);
+			console.log(dataObject);
+			console.log(creative, dynamicContent);
+			if (!creative || !dynamicContent)
+				throw new Error(
+					"Both creative and dynamicContent properties must be present".yellow
+				);
 
-				return `${creative.join(".")} = ${dynamicContent.join(".")};\n`;
-			})
-			.join("  ");
+			return `${creative.join(".")} = ${dynamicContent.join(".")};\n`;
+		})
+		.join("  ");
 
-		return concatDynamicValues;
+	return concatDynamicValues;
 }
 
-// console.log(setDynamicDataString([{
-// 	"creative" : "data.url"
-//  }]))
+function validateGenCodeString(encodedString) {
+	const base64Regex =
+		/^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}==)?$/;
 
-function decodeString(encodedString) {
-	// add error handling for case where non string given as argument
-	const base64Regex = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{3}=|[A-Za-z0-9+\/]{2}==)?$/;
-// amend here
-	// if (typeof encodedString !== 'string') return false;
-
-	console.log(base64Regex.test(encodedString));
-
-	if (base64Regex.test(encodedString)) {
+	if (typeof encodedString !== "string") {
+		throw new Error("Gen code should be a valid string");
+	} else if (base64Regex.test(encodedString)) {
 		return Buffer.from(encodedString, "base64").toString("utf8");
-	} 
-	return encodedString
+	} else {
+		return encodedString;
+	}
 }
 
 // Build path with partial application
@@ -155,17 +149,20 @@ function setFilePath(baseDir) {
 	};
 }
 
-export {decodeString, setDynamicDataString, getConfigValues}
+export { validateGenCodeString, setDynamicDataString, getConfigValues };
+
 // ToDo
 // set up tests
 // setDynamicDataString, getConfigValues & setFilePath
 // =========================
 // setDynamicDataString - Work on handling errors for use case with
 // 1. no data - use typescript
-// 
+//
 // getConfigValues - check that no empty values are given
 // *********
-// decodeString - check that string is supplied as argument
+// setFilePath - use cases for baseDir, sizeDir, file
+
+
 // =========================
 // add zip file functionality
 

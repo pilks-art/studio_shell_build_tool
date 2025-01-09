@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import fse from "fs-extra";
 import path from "node:path";
 import {
-	decodeString,
+	validateGenCodeString,
 	setDynamicDataString,
 	getConfigValues,
 } from "../index.js";
@@ -14,7 +14,7 @@ var invalidSizePath = path.join(import.meta.dirname, "second.json");
 
 describe("config data unit tests", function () {
 	it("should return gen code as utf8", function () {
-		const decoded = decodeString("ZHluYW1pYyBkYXRhIG1vY2s=");
+		const decoded = validateGenCodeString("ZHluYW1pYyBkYXRhIG1vY2s=");
 
 		assert.equal(decoded, "dynamic data mock");
 	});
@@ -22,7 +22,7 @@ describe("config data unit tests", function () {
 	it("should throw an error if gen code is not string", function (t) {
 		assert.throws(
 			function () {
-				decodeString('a non base64 string')
+				validateGenCodeString(["test"]);
 			},
 			{
 				name: "Error",
@@ -48,13 +48,16 @@ describe("config data unit tests", function () {
 	it("should throw an error if dynamic data object does not have 2 properties", function (t) {
 		assert.throws(
 			function () {
-				setDynamicDataString([{
-					"creative" : "data.url"
-				 }]);
+				setDynamicDataString([
+					{
+						creative: "data.url",
+					},
+				]);
 			},
 			{
 				name: "Error",
-				message: "\x1B[33mBoth creative and dynamicContent properties must be present\x1B[39m",
+				message:
+					"\x1B[33mBoth creative and dynamicContent properties must be present\x1B[39m",
 			}
 		);
 	});
